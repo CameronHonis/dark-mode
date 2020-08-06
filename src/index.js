@@ -1,4 +1,6 @@
 import React, { useState, useEffect } from "react";
+import { useDarkMode } from './hooks/useDarkMode.js'
+import { useSearchBar } from './hooks/useSearchBar.js'
 import ReactDOM from "react-dom";
 import axios from "axios";
 
@@ -8,7 +10,16 @@ import Navbar from "./components/Navbar";
 import "./styles.scss";
 
 const App = () => {
+  const [searchText, setSearchText] = useState('')
+  const [keyText, setKeyText] = useState('')
   const [coinData, setCoinData] = useState([]);
+  const [darkMode, setDarkMode] = useDarkMode()
+  const filteredArray = useSearchBar(coinData, keyText, searchText)
+
+  const toggleMode = e => {
+    e.preventDefault();
+    setDarkMode(!darkMode);
+  };
 
   useEffect(() => {
     axios
@@ -19,9 +30,11 @@ const App = () => {
       .catch(err => console.log(err));
   }, []);
   return (
-    <div className={darkmode ? "dark-mode App" : "App"}>
-      <Navbar />
-      <Charts coinData={coinData} />
+    <div className={JSON.parse(window.localStorage.getItem('isDarkMode')) ? "dark-mode App" : "App"}>
+      <input placeholder='search' onChange={e => setSearchText(e.target.value)} />
+      <input placeholder='attr. name' onChange={e => setKeyText(e.target.value)} />
+      <Navbar darkMode={darkMode} toggleMode={toggleMode} />
+      <Charts coinData={filteredArray} />
     </div>
   );
 };
